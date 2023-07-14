@@ -1,0 +1,716 @@
+diff --git a/.gitignore b/.gitignore
+index ff7d090..eaf57aa 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -5,4 +5,5 @@
+ *.swp
+ 
+ **/.idea
++**/.vscode
+ 
+diff --git a/ClassyTaxiServer/src/controller/functions/content.ts b/ClassyTaxiServer/src/controller/functions/content.ts
+index eb79558..aedf974 100644
+--- a/ClassyTaxiServer/src/controller/functions/content.ts
++++ b/ClassyTaxiServer/src/controller/functions/content.ts
+@@ -34,10 +34,11 @@ const OTP_PRODUCT = functions.config().app.otp_plan_product;
+ * @param {Response} response
+ */
+ export const content_basic = functions.https.onRequest(async (request, response) => {
+-  return verifyFirebaseAuthIdToken(request, response)
+-    .then(async (decodedToken) => {
+-      const uid = decodedToken.uid;
+-      await verifySubscriptionOwnershipAsync(uid, [BASIC_PLAN_PRODUCT, PREMIUM_PLAN_PRODUCT]);
++  // return verifyFirebaseAuthIdToken(request, response)
++  //   .then(async (decodedToken) => {
++    return Promise.resolve().then(async () => {
++      // const uid = decodedToken.uid;
++      // await verifySubscriptionOwnershipAsync(uid, [BASIC_PLAN_PRODUCT, PREMIUM_PLAN_PRODUCT]);
+ 
+       const data = contentManager.getBasicContent();
+       response.send(data);
+@@ -52,10 +53,11 @@ export const content_basic = functions.https.onRequest(async (request, response)
+ * @param {Response} response
+ */
+ export const content_premium = functions.https.onRequest(async (request, response) => {
+-  return verifyFirebaseAuthIdToken(request, response)
+-    .then(async (decodedToken) => {
+-      const uid = decodedToken.uid;
+-      await verifySubscriptionOwnershipAsync(uid, [PREMIUM_PLAN_PRODUCT]);
++  // return verifyFirebaseAuthIdToken(request, response)
++  //   .then(async (decodedToken) => {
++    return Promise.resolve().then(async () => {
++      // const uid = decodedToken.uid;
++      // await verifySubscriptionOwnershipAsync(uid, [PREMIUM_PLAN_PRODUCT]);
+ 
+       const data = contentManager.getPremiumContent();
+       response.send(data);
+@@ -70,10 +72,11 @@ export const content_premium = functions.https.onRequest(async (request, respons
+ * @param {Response} response
+ */
+ export const content_otp = functions.https.onRequest(async (request, response) => {
+-  return verifyFirebaseAuthIdToken(request, response)
+-    .then(async (decodedToken) => {
+-      const uid = decodedToken.uid;
+-      await verifyOtpOwnershipAsync(uid, [OTP_PRODUCT]);
++  // return verifyFirebaseAuthIdToken(request, response)
++  //   .then(async (decodedToken) => {
++    return Promise.resolve().then(async () => {
++      // const uid = decodedToken.uid;
++      // await verifyOtpOwnershipAsync(uid, [OTP_PRODUCT]);
+ 
+       const data = contentManager.getOtpContent();
+       response.send(data);
+@@ -84,33 +87,33 @@ export const content_otp = functions.https.onRequest(async (request, response) =
+ 
+ /* Util function that verifies if current user owns at least one active purchases listed in products
+ */
+-async function verifySubscriptionOwnershipAsync(uid: string, products: Array<string>): Promise<void> {
+-  const purchaseList = await playBilling.users().queryCurrentSubscriptions(uid)
+-    .catch(err => {
+-      console.error(err.message);
+-      throw new functions.https.HttpsError('internal', 'Internal server error');
+-    });
++// async function verifySubscriptionOwnershipAsync(uid: string, products: Array<string>): Promise<void> {
++//   const purchaseList = await playBilling.users().queryCurrentSubscriptions(uid)
++//     .catch(err => {
++//       console.error(err.message);
++//       throw new functions.https.HttpsError('internal', 'Internal server error');
++//     });
+ 
+-  const subscriptionStatusList = purchaseList.map(subscriptionPurchase => new SubscriptionStatus(subscriptionPurchase));
++//   const subscriptionStatusList = purchaseList.map(subscriptionPurchase => new SubscriptionStatus(subscriptionPurchase));
+ 
+-  const doesUserHaveTheProduct = subscriptionStatusList.some(subscription => ((Object.keys(subscription).length > 0) && (subscription.isEntitlementActive)));
++//   const doesUserHaveTheProduct = subscriptionStatusList.some(subscription => ((Object.keys(subscription).length > 0) && (subscription.isEntitlementActive)));
+ 
+-  if (!doesUserHaveTheProduct) {
+-    throw new functions.https.HttpsError('permission-denied', 'Valid subscription not found');
+-  }
+-}
++//   if (!doesUserHaveTheProduct) {
++//     throw new functions.https.HttpsError('permission-denied', 'Valid subscription not found');
++//   }
++// }
+ 
+ /* Util function that verifies if current user owns at least one active purchases listed in OTP products
+ */
+-async function verifyOtpOwnershipAsync(uid: string, products: Array<string>): Promise<void> {
+-  const purchaseList = await playBilling.users().queryCurrentOneTimeProductPurchases(uid)
+-    .catch(err => {
+-      console.error(err.message);
+-      throw new functions.https.HttpsError('internal', 'Internal server error');
+-    });
+-
+-  const isUserHavingTheProduct = purchaseList.some(purchase => ((products.indexOf(purchase.product) > -1) && (purchase.isEntitlementActive())));
+-  if (!isUserHavingTheProduct) {
+-    throw new functions.https.HttpsError('permission-denied', 'Valid one-time product purchase not found');
+-  }
+-}
+\ No newline at end of file
++// async function verifyOtpOwnershipAsync(uid: string, products: Array<string>): Promise<void> {
++//   const purchaseList = await playBilling.users().queryCurrentOneTimeProductPurchases(uid)
++//     .catch(err => {
++//       console.error(err.message);
++//       throw new functions.https.HttpsError('internal', 'Internal server error');
++//     });
++
++//   const isUserHavingTheProduct = purchaseList.some(purchase => ((products.indexOf(purchase.product) > -1) && (purchase.isEntitlementActive())));
++//   if (!isUserHavingTheProduct) {
++//     throw new functions.https.HttpsError('permission-denied', 'Valid one-time product purchase not found');
++//   }
++// }
+\ No newline at end of file
+diff --git a/ClassyTaxiServer/src/controller/functions/one_time_product.ts b/ClassyTaxiServer/src/controller/functions/one_time_product.ts
+index 5b1f07c..bbb755e 100644
+--- a/ClassyTaxiServer/src/controller/functions/one_time_product.ts
++++ b/ClassyTaxiServer/src/controller/functions/one_time_product.ts
+@@ -33,39 +33,41 @@
+    * @param {Response} response
+    */
+   export const otp_register = functions.https.onRequest(async (request, response) => {
+-    return verifyFirebaseAuthIdToken(request, response)
+-      .then(async (decodedToken) => {
++    // return verifyFirebaseAuthIdToken(request, response)
++    //   .then(async (decodedToken) => {
++      return Promise.resolve().then(async () => {
+         const product = request.body.product;
+-        const uid = decodedToken.uid;
++        // const uid = decodedToken.uid;
+         const token = request.body.purchaseToken;
+ 
+-        if (!token || !uid || !product) {
++        if (!token || !product) {
+           throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
+         }
+ 
+-        try {
+-          await playBilling.purchases().registerToUserAccount(
+-            PACKAGE_NAME,
+-            product,
+-            token,
+-            ProductType.ONE_TIME,
+-            uid
+-          );
+-        } catch (err) {
+-          switch (err.name) {
+-            case PurchaseUpdateError.CONFLICT: {
+-              logAndThrowHttpsError('already-exists', err.message);
+-            }
+-            case PurchaseUpdateError.INVALID_TOKEN: {
+-              logAndThrowHttpsError('not-found', err.message);
+-            }
+-            default: {
+-              logAndThrowHttpsError('internal', err.message);
+-            }
+-          }
+-        };
++        // try {
++        //   await playBilling.purchases().registerToUserAccount(
++        //     PACKAGE_NAME,
++        //     product,
++        //     token,
++        //     ProductType.ONE_TIME,
++        //     uid
++        //   );
++        // } catch (err) {
++        //   switch (err.name) {
++        //     case PurchaseUpdateError.CONFLICT: {
++        //       logAndThrowHttpsError('already-exists', err.message);
++        //     }
++        //     case PurchaseUpdateError.INVALID_TOKEN: {
++        //       logAndThrowHttpsError('not-found', err.message);
++        //     }
++        //     default: {
++        //       logAndThrowHttpsError('internal', err.message);
++        //     }
++        //   }
++        // };
+ 
+-        const data = await getOneTimePurchasesResponseObject(uid);
++        // const data = await getOneTimePurchasesResponseObject(uid);
++        const data = await getOneTimePurchasesResponseObject(PACKAGE_NAME, product, token);
+         response.send(data);
+       }).catch((error: functions.https.HttpsError) => {
+         sendHttpsError(error, response);
+@@ -78,10 +80,19 @@
+     * @param {Response} response
+     */
+    export const otp_status = functions.https.onRequest(async (request, response) => {
+-     return verifyFirebaseAuthIdToken(request, response)
+-       .then(async decodedToken => {
+-         const uid = decodedToken.uid;
+-         const responseData = await getOneTimePurchasesResponseObject(uid)
++    //  return verifyFirebaseAuthIdToken(request, response)
++    //    .then(async decodedToken => {
++      return Promise.resolve().then(async () => {
++        const product = request.body.product;
++        // const uid = decodedToken.uid;
++        const token = request.body.purchaseToken;
++
++        if (!token || !product) {
++          throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
++        }
++
++        //  const responseData = await getOneTimePurchasesResponseObject(uid)
++         const responseData = await getOneTimePurchasesResponseObject(PACKAGE_NAME, product, token);
+          response.send(responseData);
+        }).catch((error: functions.https.HttpsError) => {
+          sendHttpsError(error, response);
+@@ -97,13 +108,17 @@
+     */
+    export const otp_acknowledge = functions.https.onRequest(async (request, response) => {
+      console.log('otp_acknowledge called server side');
+-     return verifyFirebaseAuthIdToken(request, response)
+-     .then(async (decodedToken) => {
+-       const product = request.body.product;
+-       const uid = decodedToken.uid;
+-       const token = request.body.purchaseToken;
++    //  return verifyFirebaseAuthIdToken(request, response)
++    //  .then(async (decodedToken) => {
++      return Promise.resolve().then(async () => {
++        const product = request.body.product;
++        // const uid = decodedToken.uid;
++        const token = request.body.purchaseToken;
+ 
+-       if (!token || !uid) {
++      //  if (!token || !uid) {
++      //    throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
++      //  }
++       if (!token || !product) {
+          throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
+        }
+        try {
+@@ -116,7 +131,8 @@
+          console.log('There was an error', err.message);
+        }
+ 
+-       const data = await getOneTimePurchasesResponseObject(uid);
++      //  const data = await getOneTimePurchasesResponseObject(uid);
++       const data = await getOneTimePurchasesResponseObject(PACKAGE_NAME, product, token);
+        console.log('data back from Firestore: ', data);
+        response.send(data);
+      })
+@@ -132,15 +148,15 @@
+ 
+    export const otp_consume = functions.https.onRequest(async (request, response) => {
+        console.log('consume_purchase called server side');
+-       return verifyFirebaseAuthIdToken(request, response)
+-       .then(async (decodedToken) => {
+-         const product = request.body.product;
+-         const uid = decodedToken.uid;
+-         const token = request.body.purchaseToken;
++      //  return verifyFirebaseAuthIdToken(request, response)
++      //  .then(async (decodedToken) => {
++        return Promise.resolve().then(async () => {
++          const product = request.body.product;
++          // const uid = decodedToken.uid;
++          const token = request.body.purchaseToken;
+          console.log('product: ', product);
+-         console.log('uid: ', uid);
+          console.log('token: ', token);
+-         if (!token || !uid) {
++         if (!token || !product) {
+            throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
+          }
+          try {
+@@ -152,7 +168,8 @@
+          } catch (err) {
+            console.log('There was an error', err.message);
+          }
+-         const data = await getOneTimePurchasesResponseObject(uid);
++        //  const data = await getOneTimePurchasesResponseObject(uid);
++         const data = await getOneTimePurchasesResponseObject(PACKAGE_NAME, product, token);
+          console.log('data back from Firestore: ', data);
+          response.send(data);
+        })
+@@ -160,10 +177,12 @@
+ 
+    // Util method to get a list of one-time products belong to an user, in the format that can be returned to client app
+    // It also handles library internal error and convert it to an HTTP error to return to client.
+-   async function getOneTimePurchasesResponseObject(userId: string): Promise<Object> {
++   async function getOneTimePurchasesResponseObject(packageName: string, product: string, token: string): Promise<Object> {
+      try {
+        // Fetch purchase list from purchase records
+-       const purchaseList = await playBilling.users().queryCurrentOneTimeProductPurchases(userId);
++      //  const purchaseList = await playBilling.users().queryCurrentOneTimeProductPurchases(userId);
++       const purchaseList = [];
++       purchaseList.push(await playBilling.purchases().queryOneTimeProductPurchase(packageName, product, token));
+        // Convert Purchase objects to OneTimeProductPurchaseStatus objects
+        const oneTimeProductPurchaseStatusList = purchaseList.map(oneTimeProductPurchase => new OneTimeProductPurchaseStatus(oneTimeProductPurchase));
+        // Return them in a format that is expected by client app
+diff --git a/ClassyTaxiServer/src/controller/functions/subscription.ts b/ClassyTaxiServer/src/controller/functions/subscription.ts
+index 825ead7..b97e919 100644
+--- a/ClassyTaxiServer/src/controller/functions/subscription.ts
++++ b/ClassyTaxiServer/src/controller/functions/subscription.ts
+@@ -17,7 +17,7 @@
+  import * as firebase from 'firebase-admin'
+  import * as functions from 'firebase-functions';
+  import { ProductType, PurchaseUpdateError, DeveloperNotification, NotificationType } from "../../play-billing";
+- import { playBilling, PACKAGE_NAME, instanceIdManager, sendHttpsError, verifyFirebaseAuthIdToken, logAndThrowHttpsError } from '../shared'
++ import { playBilling, PACKAGE_NAME, instanceIdManager, sendHttpsError, logAndThrowHttpsError } from '../shared'
+  import { SubscriptionStatus } from '../../model/SubscriptionStatus';
+ 
+  /* This file contains implementation of functions related to linking subscription purchase with user account
+@@ -33,39 +33,36 @@
+   * @param {Response} response
+   */
+  export const subscription_register = functions.https.onRequest(async (request, response) => {
+-   return verifyFirebaseAuthIdToken(request, response)
+-     .then(async (decodedToken) => {
++   return Promise.resolve().then(async () => {
+        const product = request.body.product;
+-       const uid = decodedToken.uid;
+        const token = request.body.purchaseToken;
+ 
+-       if (!token || !uid || !product) {
++       if (!token || !product) {
+          throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
+        }
+ 
+-       try {
+-         await playBilling.purchases().registerToUserAccount(
+-           PACKAGE_NAME,
+-           product,
+-           token,
+-           ProductType.SUBS,
+-           uid
+-         );
+-       } catch (err) {
+-         switch (err.name) {
+-           case PurchaseUpdateError.CONFLICT: {
+-             logAndThrowHttpsError('already-exists', err.message);
+-           }
+-           case PurchaseUpdateError.INVALID_TOKEN: {
+-             logAndThrowHttpsError('not-found', err.message);
+-           }
+-           default: {
+-             logAndThrowHttpsError('internal', err.message);
+-           }
+-         }
+-       };
+-
+-       const data = await getSubscriptionsResponseObject(uid);
++      //  try {
++      //    await playBilling.purchases().registerToUserAccount(
++      //      PACKAGE_NAME,
++      //      product,
++      //      token,
++      //      ProductType.SUBS
++      //    );
++      //  } catch (err) {
++      //    switch (err.name) {
++      //      case PurchaseUpdateError.CONFLICT: {
++      //        logAndThrowHttpsError('already-exists', err.message);
++      //      }
++      //      case PurchaseUpdateError.INVALID_TOKEN: {
++      //        logAndThrowHttpsError('not-found', err.message);
++      //      }
++      //      default: {
++      //        logAndThrowHttpsError('internal', err.message);
++      //      }
++      //    }
++      //  };
++
++       const data = await getSubscriptionsResponseObject(PACKAGE_NAME, product, token);
+        response.send(data);
+      }).catch((error: functions.https.HttpsError) => {
+        sendHttpsError(error, response);
+@@ -81,13 +78,15 @@
+   */
+  export const acknowledge_purchase = functions.https.onRequest(async (request, response) => {
+    console.log('acknowledge_purchase called server side');
+-   return verifyFirebaseAuthIdToken(request, response)
+-   .then(async (decodedToken) => {
++  //  return verifyFirebaseAuthIdToken(request, response)
++  //  .then(async (decodedToken) => {
++   return Promise.resolve().then(async () => {
+      const product = request.body.product;
+-     const uid = decodedToken.uid;
++    //  const uid = decodedToken.uid;
+      const token = request.body.purchaseToken;
+ 
+-     if (!token || !uid) {
++    //  if (!token || !uid) {
++     if (!token || !product) {
+        throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
+      }
+      try {
+@@ -100,7 +99,8 @@
+        console.log('There was an error', err.message);
+      }
+ 
+-     const data = await getSubscriptionsResponseObject(uid);
++    //  const data = await getSubscriptionsResponseObject(uid);
++     const data = await getSubscriptionsResponseObject(PACKAGE_NAME, product, token);
+      console.log('data back from Firestore: ', data);
+      response.send(data);
+    })
+@@ -116,32 +116,39 @@
+   * @param {Response} response
+   */
+  export const subscription_transfer = functions.https.onRequest(async (request, response) => {
+-   return verifyFirebaseAuthIdToken(request, response)
+-     .then(async (decodedToken) => {
++  //  return verifyFirebaseAuthIdToken(request, response)
++  //    .then(async (decodedToken) => {
++   return Promise.resolve().then(async () => {
+        const product = request.body.product;
+-       const uid = decodedToken.uid;
++      //  const uid = decodedToken.uid;
+        const token = request.body.purchaseToken;
+ 
+-       try {
+-         await playBilling.purchases().transferToUserAccount(
+-           PACKAGE_NAME,
+-           product,
+-           token,
+-           ProductType.SUBS,
+-           uid
+-         );
+-       } catch (err) {
+-         switch (err.name) {
+-           case PurchaseUpdateError.INVALID_TOKEN: {
+-             logAndThrowHttpsError('not-found', err.message);
+-           }
+-           default: {
+-             logAndThrowHttpsError('internal', err.message);
+-           }
+-         }
++       if (!token || !product) {
++         throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
+        }
+ 
+-       const data = await getSubscriptionsResponseObject(uid);
++      //  try {
++      //    await playBilling.purchases().transferToUserAccount(
++      //      PACKAGE_NAME,
++      //      product,
++      //      token,
++      //      ProductType.SUBS
++      //     //  ProductType.SUBS,
++      //     //  uid
++      //    );
++      //  } catch (err) {
++      //    switch (err.name) {
++      //      case PurchaseUpdateError.INVALID_TOKEN: {
++      //        logAndThrowHttpsError('not-found', err.message);
++      //      }
++      //      default: {
++      //        logAndThrowHttpsError('internal', err.message);
++      //      }
++      //    }
++      //  }
++
++      //  const data = await getSubscriptionsResponseObject(uid);
++       const data = await getSubscriptionsResponseObject(PACKAGE_NAME, product, token);
+        response.send(data);
+      }).catch((error: functions.https.HttpsError) => {
+        sendHttpsError(error, response);
+@@ -159,10 +166,17 @@
+   * @param {Response} response
+   */
+  export const subscription_status = functions.https.onRequest(async (request, response) => {
+-   return verifyFirebaseAuthIdToken(request, response)
+-     .then(async decodedToken => {
+-       const uid = decodedToken.uid;
+-       const responseData = await getSubscriptionsResponseObject(uid)
++  //  return verifyFirebaseAuthIdToken(request, response)
++  //    .then(async decodedToken => {
++   return Promise.resolve().then(async () => {
++      //  const uid = decodedToken.uid;
++      //  const responseData = await getSubscriptionsResponseObject(uid)
++       const product = request.body.product;
++       const token = request.body.purchaseToken;
++       if (!token || !product) {
++         throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
++       }
++       const responseData = await getSubscriptionsResponseObject(PACKAGE_NAME, product, token);
+        response.send(responseData);
+      }).catch((error: functions.https.HttpsError) => {
+        sendHttpsError(error, response);
+@@ -180,8 +194,9 @@
+      const purchase = await playBilling.purchases().processDeveloperNotification(PACKAGE_NAME, developerNotification);
+ 
+      // Send the updated SubscriptionStatus to the client app instances of the user who own the purchase
+-     if (purchase && purchase.userId) {
+-       await sendSubscriptionStatusUpdateToClient(purchase.userId,
++    //  if (purchase && purchase.userId) {
++     if (purchase && purchase.purchaseToken) {
++       await sendSubscriptionStatusUpdateToClient(purchase.packageName, purchase.product, purchase.purchaseToken,
+          developerNotification.subscriptionNotification.notificationType)
+      }
+    } catch (error) {
+@@ -191,10 +206,12 @@
+ 
+  // Util method to get a list of subscriptions belong to an user, in the format that can be returned to client app
+  // It also handles library internal error and convert it to an HTTP error to return to client.
+- async function getSubscriptionsResponseObject(userId: string): Promise<Object> {
++ async function getSubscriptionsResponseObject(packageName: string, product: string, token: string): Promise<Object> {
+    try {
+      // Fetch purchase list from purchase records
+-     const purchaseList = await playBilling.users().queryCurrentSubscriptions(userId);
++    //  const purchaseList = await playBilling.users().queryCurrentSubscriptions(userId);
++     const purchaseList = [];
++     purchaseList.push(await playBilling.purchases().querySubscriptionPurchase(packageName, product, token));
+      // Convert Purchase objects to SubscriptionStatus objects
+      const subscriptionStatusList = purchaseList.map(subscriptionPurchase => new SubscriptionStatus(subscriptionPurchase));
+      // Return them in a format that is expected by client app
+@@ -206,12 +223,13 @@
+  }
+ 
+  // Util method to send updated list of SubscriptionPurchase to client app via FCM
+- async function sendSubscriptionStatusUpdateToClient(userId: string, notificationType: NotificationType): Promise<void> {
++ async function sendSubscriptionStatusUpdateToClient(package_name: string, product: string, token: string, notificationType: NotificationType): Promise<void> {
+    // Fetch updated subscription list of the user
+-   const subscriptionResponseObject = await getSubscriptionsResponseObject(userId);
++  //  const subscriptionResponseObject = await getSubscriptionsResponseObject(userId);
++   const subscriptionResponseObject = await getSubscriptionsResponseObject(package_name, product, token);
+ 
+    // Get token list of devices that the user owns
+-   const tokens = await instanceIdManager.getInstanceIds(userId);
++  //  const tokens = await instanceIdManager.getInstanceIds(userId);
+ 
+    // Compose the FCM data message to send to the devices
+    const message = {
+@@ -222,8 +240,8 @@
+    }
+ 
+    // Send message to devices using FCM
+-   const messageResponse = await firebase.messaging().sendToDevice(tokens, message);
+-   console.log('Sent subscription update to user devices. UserId =', userId,
++   const messageResponse = await firebase.messaging().sendToDevice(token, message);
++   console.log('Sent subscription update to user devices. Token =', token,
+      ' messageResponse = ', messageResponse);
+ 
+    const tokensToRemove = [];
+@@ -231,10 +249,11 @@
+      const error = result.error;
+      if (error) {
+        // There's some issue sending message to some tokens
+-       console.error('Failure sending notification to', tokens[index], error);
++       console.error('Failure sending notification to', token, error);
+        // Cleanup the tokens who are not registered anymore.
+        if (error.code === 'messaging/invalid-registration-token' || error.code === 'messaging/registration-token-not-registered') {
+-         tokensToRemove.push(instanceIdManager.unregisterInstanceId(userId, tokens[index]));
++        //  tokensToRemove.push(instanceIdManager.unregisterInstanceId(userId, tokens[index]));
++         tokensToRemove.push(token);
+        }
+      }
+    })
+diff --git a/ClassyTaxiServer/src/play-billing/PlayBilling.ts b/ClassyTaxiServer/src/play-billing/PlayBilling.ts
+index 43dcc55..ba80137 100644
+--- a/ClassyTaxiServer/src/play-billing/PlayBilling.ts
++++ b/ClassyTaxiServer/src/play-billing/PlayBilling.ts
+@@ -36,7 +36,7 @@ export default class PlayBilling {
+     //Initialize our own PurchaseManager and UserManager
+     const purchasesDbRef = firebaseApp.firestore().collection('purchases');
+     this.purchaseManager = new PurchaseManager(purchasesDbRef, this.playDeveloperApiClient);
+-    this.userManager = new UserManager(purchasesDbRef, this.purchaseManager);
++    // this.userManager = new UserManager(purchasesDbRef, this.purchaseManager);
+   }
+ 
+   /*
+@@ -49,9 +49,9 @@ export default class PlayBilling {
+   /*
+    * A class to lookup purchases registered to a particular user
+    */
+-  users(): UserManager {
+-    return this.userManager;
+-  }
++  // users(): UserManager {
++  //   return this.userManager;
++  // }
+ 
+   /* 
+    * Library initialization with a service account to access Play Developer API and an initialized FirebaseApp.
+diff --git a/ClassyTaxiServer/src/play-billing/PurchasesManager.ts b/ClassyTaxiServer/src/play-billing/PurchasesManager.ts
+index fb0536d..80d2447 100644
+--- a/ClassyTaxiServer/src/play-billing/PurchasesManager.ts
++++ b/ClassyTaxiServer/src/play-billing/PurchasesManager.ts
+@@ -275,7 +275,7 @@
+          const now = Date.now();
+          const subscriptionPurchase = SubscriptionPurchaseImpl.fromApiResponse(apiResponse, packageName, purchaseToken, product, now);
+          subscriptionPurchase.replacedByAnotherPurchase = true; // Mark the purchase as already being replaced by other purchase.
+-         subscriptionPurchase.userId = REPLACED_PURCHASE_USERID_PLACEHOLDER;
++        //  subscriptionPurchase.userId = REPLACED_PURCHASE_USERID_PLACEHOLDER;
+          const firestoreObject = subscriptionPurchase.toFirestoreObject();
+          await purchaseRecordDoc.ref.set(firestoreObject);
+ 
+@@ -336,7 +336,7 @@
+          const now = Date.now();
+          const subscriptionPurchase = SubscriptionPurchaseImplV2.fromApiResponse(apiResponseV2, packageName, purchaseToken, product, now);
+          subscriptionPurchase.replacedByAnotherPurchase = true; // Mark the purchase as already being replaced by other purchase.
+-         subscriptionPurchase.userId = REPLACED_PURCHASE_USERID_PLACEHOLDER;
++        //  subscriptionPurchase.userId = REPLACED_PURCHASE_USERID_PLACEHOLDER;
+          const firestoreObject = subscriptionPurchase.toFirestoreObject();
+          await purchaseRecordDoc.ref.set(firestoreObject);
+ 
+@@ -381,57 +381,57 @@
+     * Register a purchase (both one-time product and recurring subscription) to a user.
+     * It's intended to be exposed to Android app to verify purchases made in the app
+     */
+-   async registerToUserAccount(packageName: string, product: string, purchaseToken: string, productType: ProductType, userId: string): Promise<void> {
+-     // STEP 1. Fetch the purchase using Play Developer API and purchase records in Firestore.
+-     let purchase: Purchase;
+-     try {
+-       purchase = await this.queryPurchase(packageName, product, purchaseToken, productType);
+-     } catch (err) {
+-       // console.error('Error querying purchase', err);
+-
+-       // Error when attempt to query purchase. Return invalid token to caller.
+-       const libraryError = new Error(err.message);
+-       libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
+-       throw libraryError;
+-     }
+-
+-     // STEP 2. Check if the purchase is registerable.
+-     if (!purchase.isRegisterable()) {
+-       const libraryError = new Error('Purchase is not registerable');
+-       libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
+-       throw libraryError;
+-     }
+-
+-     // STEP 3. Check if the purchase has been registered to an user. If it is, then return conflict error to our caller.
+-     if (purchase.userId === userId) {
+-       // Purchase record already registered to the target user. We'll do nothing.
+-       return;
+-     } else if (purchase.userId) {
+-       console.log('Purchase has been registered to another user');
+-       // Purchase record already registered to different user. Return 'conflict' to caller
+-       const libraryError = new Error('Purchase has been registered to another user');
+-       libraryError.name = PurchaseUpdateError.CONFLICT;
+-       throw libraryError;
+-     }
+-
+-     // STEP 3: Register purchase to the user
+-     await this.forceRegisterToUserAccount(purchaseToken, userId);
+-   }
+-
+-   async transferToUserAccount(packageName: string, product: string, purchaseToken: string, productType: ProductType, userId: string): Promise<void> {
+-     try {
+-       // STEP 1. Fetch the purchase using Play Developer API and purchase records in Firestore.
+-       await this.queryPurchase(packageName, product, purchaseToken, productType);
+-
+-       // STEP 2: Attempt to transfer a purchase to the user
+-       await this.forceRegisterToUserAccount(purchaseToken, userId);
+-     } catch (err) {
+-       // Error when attempt to query purchase. Return invalid token to caller.
+-       const libraryError = new Error(err.message);
+-       libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
+-       throw libraryError;
+-     }
+-   }
++  //  async registerToUserAccount(packageName: string, product: string, purchaseToken: string, productType: ProductType): Promise<void> {
++  //    // STEP 1. Fetch the purchase using Play Developer API and purchase records in Firestore.
++  //    let purchase: Purchase;
++  //    try {
++  //      purchase = await this.queryPurchase(packageName, product, purchaseToken, productType);
++  //    } catch (err) {
++  //      // console.error('Error querying purchase', err);
++
++  //      // Error when attempt to query purchase. Return invalid token to caller.
++  //      const libraryError = new Error(err.message);
++  //      libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
++  //      throw libraryError;
++  //    }
++
++  //    // STEP 2. Check if the purchase is registerable.
++  //    if (!purchase.isRegisterable()) {
++  //      const libraryError = new Error('Purchase is not registerable');
++  //      libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
++  //      throw libraryError;
++  //    }
++
++  //    // STEP 3. Check if the purchase has been registered to an user. If it is, then return conflict error to our caller.
++  //   //  if (purchase.userId === userId) {
++  //   //    // Purchase record already registered to the target user. We'll do nothing.
++  //   //    return;
++  //   //  } else if (purchase.userId) {
++  //   //    console.log('Purchase has been registered to another user');
++  //   //    // Purchase record already registered to different user. Return 'conflict' to caller
++  //   //    const libraryError = new Error('Purchase has been registered to another user');
++  //   //    libraryError.name = PurchaseUpdateError.CONFLICT;
++  //   //    throw libraryError;
++  //   //  }
++
++  //    // STEP 3: Register purchase to the user
++  //   //  await this.forceRegisterToUserAccount(purchaseToken, userId);
++  //  }
++
++  //  async transferToUserAccount(packageName: string, product: string, purchaseToken: string, productType: ProductType, userId: string): Promise<void> {
++  //    try {
++  //      // STEP 1. Fetch the purchase using Play Developer API and purchase records in Firestore.
++  //      await this.queryPurchase(packageName, product, purchaseToken, productType);
++
++  //      // STEP 2: Attempt to transfer a purchase to the user
++  //      await this.forceRegisterToUserAccount(purchaseToken, userId);
++  //    } catch (err) {
++  //      // Error when attempt to query purchase. Return invalid token to caller.
++  //      const libraryError = new Error(err.message);
++  //      libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
++  //      throw libraryError;
++  //    }
++  //  }
+ 
+    async processDeveloperNotification(packageName: string, notification: DeveloperNotification): Promise<SubscriptionPurchaseV2 | null> {
+      if (notification.testNotification) {

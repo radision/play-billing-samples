@@ -67,7 +67,6 @@ export class OneTimeProductPurchaseImpl implements OneTimeProductPurchase {
   packageName: string;
   purchaseToken: string;
   product: string;
-  userId?: string;
   verifiedAt: number;
 
   // Convert raw api response from Play Developer API to an OneTimeProductPurchase object
@@ -146,7 +145,6 @@ export class SubscriptionPurchaseImpl implements SubscriptionPurchase {
   packageName: string;
   purchaseToken: string;
   product: string;
-  userId?: string;
   verifiedAt: number; // timestamp of last purchase verification by Play Developer API
   replacedByAnotherPurchase: boolean;
   isMutable: boolean; // indicate if the subscription purchase details can be changed in the future (i.e. expiry date changed because of auto-renewal)
@@ -271,7 +269,6 @@ export class SubscriptionPurchaseImplV2 implements SubscriptionPurchaseV2 {
   packageName: string;
   purchaseToken: string;
   product: string;
-  userId?: string;
   verifiedAt: number; // timestamp of last purchase verification by Play Developer API
   replacedByAnotherPurchase: boolean;
   isMutable: boolean; // indicate if the subscription purchase details can be changed in the future (i.e. expiry date changed because of auto-renewal)

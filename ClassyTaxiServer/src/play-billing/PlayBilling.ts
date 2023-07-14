@@ -36,7 +36,7 @@ export default class PlayBilling {
     //Initialize our own PurchaseManager and UserManager
     const purchasesDbRef = firebaseApp.firestore().collection('purchases');
     this.purchaseManager = new PurchaseManager(purchasesDbRef, this.playDeveloperApiClient);
-    this.userManager = new UserManager(purchasesDbRef, this.purchaseManager);
+    // this.userManager = new UserManager(purchasesDbRef, this.purchaseManager);
   }
 
   /*
@@ -49,9 +49,9 @@ export default class PlayBilling {
   /*
    * A class to lookup purchases registered to a particular user
    */
-  users(): UserManager {
-    return this.userManager;
-  }
+  // users(): UserManager {
+  //   return this.userManager;
+  // }
 
   /* 
    * Library initialization with a service account to access Play Developer API and an initialized FirebaseApp.
