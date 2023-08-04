@@ -28,6 +28,7 @@
    packageName: string;
    purchaseToken: string;
    product: string;
+   userId?: string; // userId of the user who made this purchase
    verifiedAt: number; // epoch timestamp of when the server last queried Play Developer API for this purchase
    isRegisterable(): boolean; // determine if a purchase can be registered to an user
  }

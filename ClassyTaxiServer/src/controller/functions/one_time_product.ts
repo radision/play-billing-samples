@@ -33,41 +33,39 @@
    * @param {Response} response
    */
   export const otp_register = functions.https.onRequest(async (request, response) => {
-    // return verifyFirebaseAuthIdToken(request, response)
-    //   .then(async (decodedToken) => {
-      return Promise.resolve().then(async () => {
+    return verifyFirebaseAuthIdToken(request, response)
+      .then(async (decodedToken) => {
         const product = request.body.product;
-        // const uid = decodedToken.uid;
+        const uid = decodedToken.uid;
         const token = request.body.purchaseToken;
 
-        if (!token || !product) {
+        if (!token || !uid || !product) {
           throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
         }
 
-        // try {
-        //   await playBilling.purchases().registerToUserAccount(
-        //     PACKAGE_NAME,
-        //     product,
-        //     token,
-        //     ProductType.ONE_TIME,
-        //     uid
-        //   );
-        // } catch (err) {
-        //   switch (err.name) {
-        //     case PurchaseUpdateError.CONFLICT: {
-        //       logAndThrowHttpsError('already-exists', err.message);
-        //     }
-        //     case PurchaseUpdateError.INVALID_TOKEN: {
-        //       logAndThrowHttpsError('not-found', err.message);
-        //     }
-        //     default: {
-        //       logAndThrowHttpsError('internal', err.message);
-        //     }
-        //   }
-        // };
+        try {
+          await playBilling.purchases().registerToUserAccount(
+            PACKAGE_NAME,
+            product,
+            token,
+            ProductType.ONE_TIME,
+            uid
+          );
+        } catch (err) {
+          switch (err.name) {
+            case PurchaseUpdateError.CONFLICT: {
+              logAndThrowHttpsError('already-exists', err.message);
+            }
+            case PurchaseUpdateError.INVALID_TOKEN: {
+              logAndThrowHttpsError('not-found', err.message);
+            }
+            default: {
+              logAndThrowHttpsError('internal', err.message);
+            }
+          }
+        };
 
-        // const data = await getOneTimePurchasesResponseObject(uid);
-        const data = await getOneTimePurchasesResponseObject(PACKAGE_NAME, product, token);
+        const data = await getOneTimePurchasesResponseObject(uid);
         response.send(data);
       }).catch((error: functions.https.HttpsError) => {
         sendHttpsError(error, response);
@@ -80,19 +78,10 @@
     * @param {Response} response
     */
    export const otp_status = functions.https.onRequest(async (request, response) => {
-    //  return verifyFirebaseAuthIdToken(request, response)
-    //    .then(async decodedToken => {
-      return Promise.resolve().then(async () => {
-        const product = request.body.product;
-        // const uid = decodedToken.uid;
-        const token = request.body.purchaseToken;
-
-        if (!token || !product) {
-          throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
-        }
-
-        //  const responseData = await getOneTimePurchasesResponseObject(uid)
-         const responseData = await getOneTimePurchasesResponseObject(PACKAGE_NAME, product, token);
+     return verifyFirebaseAuthIdToken(request, response)
+       .then(async decodedToken => {
+         const uid = decodedToken.uid;
+         const responseData = await getOneTimePurchasesResponseObject(uid)
          response.send(responseData);
        }).catch((error: functions.https.HttpsError) => {
          sendHttpsError(error, response);
@@ -108,17 +97,13 @@
     */
    export const otp_acknowledge = functions.https.onRequest(async (request, response) => {
      console.log('otp_acknowledge called server side');
-    //  return verifyFirebaseAuthIdToken(request, response)
-    //  .then(async (decodedToken) => {
-      return Promise.resolve().then(async () => {
-        const product = request.body.product;
-        // const uid = decodedToken.uid;
-        const token = request.body.purchaseToken;
+     return verifyFirebaseAuthIdToken(request, response)
+     .then(async (decodedToken) => {
+       const product = request.body.product;
+       const uid = decodedToken.uid;
+       const token = request.body.purchaseToken;
 
-      //  if (!token || !uid) {
-      //    throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
-      //  }
-       if (!token || !product) {
+       if (!token || !uid) {
          throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
        }
        try {
@@ -131,8 +116,7 @@
          console.log('There was an error', err.message);
        }
 
-      //  const data = await getOneTimePurchasesResponseObject(uid);
-       const data = await getOneTimePurchasesResponseObject(PACKAGE_NAME, product, token);
+       const data = await getOneTimePurchasesResponseObject(uid);
        console.log('data back from Firestore: ', data);
        response.send(data);
      })
@@ -148,15 +132,15 @@
 
    export const otp_consume = functions.https.onRequest(async (request, response) => {
        console.log('consume_purchase called server side');
-      //  return verifyFirebaseAuthIdToken(request, response)
-      //  .then(async (decodedToken) => {
-        return Promise.resolve().then(async () => {
-          const product = request.body.product;
-          // const uid = decodedToken.uid;
-          const token = request.body.purchaseToken;
+       return verifyFirebaseAuthIdToken(request, response)
+       .then(async (decodedToken) => {
+         const product = request.body.product;
+         const uid = decodedToken.uid;
+         const token = request.body.purchaseToken;
          console.log('product: ', product);
+         console.log('uid: ', uid);
          console.log('token: ', token);
-         if (!token || !product) {
+         if (!token || !uid) {
            throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters!');
          }
          try {
@@ -168,8 +152,7 @@
          } catch (err) {
            console.log('There was an error', err.message);
          }
-        //  const data = await getOneTimePurchasesResponseObject(uid);
-         const data = await getOneTimePurchasesResponseObject(PACKAGE_NAME, product, token);
+         const data = await getOneTimePurchasesResponseObject(uid);
          console.log('data back from Firestore: ', data);
          response.send(data);
        })
@@ -177,12 +160,10 @@
 
    // Util method to get a list of one-time products belong to an user, in the format that can be returned to client app
    // It also handles library internal error and convert it to an HTTP error to return to client.
-   async function getOneTimePurchasesResponseObject(packageName: string, product: string, token: string): Promise<Object> {
+   async function getOneTimePurchasesResponseObject(userId: string): Promise<Object> {
      try {
        // Fetch purchase list from purchase records
-      //  const purchaseList = await playBilling.users().queryCurrentOneTimeProductPurchases(userId);
-       const purchaseList = [];
-       purchaseList.push(await playBilling.purchases().queryOneTimeProductPurchase(packageName, product, token));
+       const purchaseList = await playBilling.users().queryCurrentOneTimeProductPurchases(userId);
        // Convert Purchase objects to OneTimeProductPurchaseStatus objects
        const oneTimeProductPurchaseStatusList = purchaseList.map(oneTimeProductPurchase => new OneTimeProductPurchaseStatus(oneTimeProductPurchase));
        // Return them in a format that is expected by client app

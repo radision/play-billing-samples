@@ -34,11 +34,10 @@ const OTP_PRODUCT = functions.config().app.otp_plan_product;
 * @param {Response} response
 */
 export const content_basic = functions.https.onRequest(async (request, response) => {
-  // return verifyFirebaseAuthIdToken(request, response)
-  //   .then(async (decodedToken) => {
-    return Promise.resolve().then(async () => {
-      // const uid = decodedToken.uid;
-      // await verifySubscriptionOwnershipAsync(uid, [BASIC_PLAN_PRODUCT, PREMIUM_PLAN_PRODUCT]);
+  return verifyFirebaseAuthIdToken(request, response)
+    .then(async (decodedToken) => {
+      const uid = decodedToken.uid;
+      await verifySubscriptionOwnershipAsync(uid, [BASIC_PLAN_PRODUCT, PREMIUM_PLAN_PRODUCT]);
 
       const data = contentManager.getBasicContent();
       response.send(data);
@@ -53,11 +52,10 @@ export const content_basic = functions.https.onRequest(async (request, response)
 * @param {Response} response
 */
 export const content_premium = functions.https.onRequest(async (request, response) => {
-  // return verifyFirebaseAuthIdToken(request, response)
-  //   .then(async (decodedToken) => {
-    return Promise.resolve().then(async () => {
-      // const uid = decodedToken.uid;
-      // await verifySubscriptionOwnershipAsync(uid, [PREMIUM_PLAN_PRODUCT]);
+  return verifyFirebaseAuthIdToken(request, response)
+    .then(async (decodedToken) => {
+      const uid = decodedToken.uid;
+      await verifySubscriptionOwnershipAsync(uid, [PREMIUM_PLAN_PRODUCT]);
 
       const data = contentManager.getPremiumContent();
       response.send(data);
@@ -72,11 +70,10 @@ export const content_premium = functions.https.onRequest(async (request, respons
 * @param {Response} response
 */
 export const content_otp = functions.https.onRequest(async (request, response) => {
-  // return verifyFirebaseAuthIdToken(request, response)
-  //   .then(async (decodedToken) => {
-    return Promise.resolve().then(async () => {
-      // const uid = decodedToken.uid;
-      // await verifyOtpOwnershipAsync(uid, [OTP_PRODUCT]);
+  return verifyFirebaseAuthIdToken(request, response)
+    .then(async (decodedToken) => {
+      const uid = decodedToken.uid;
+      await verifyOtpOwnershipAsync(uid, [OTP_PRODUCT]);
 
       const data = contentManager.getOtpContent();
       response.send(data);
@@ -87,33 +84,33 @@ export const content_otp = functions.https.onRequest(async (request, response) =
 
 /* Util function that verifies if current user owns at least one active purchases listed in products
 */
-// async function verifySubscriptionOwnershipAsync(uid: string, products: Array<string>): Promise<void> {
-//   const purchaseList = await playBilling.users().queryCurrentSubscriptions(uid)
-//     .catch(err => {
-//       console.error(err.message);
-//       throw new functions.https.HttpsError('internal', 'Internal server error');
-//     });
+async function verifySubscriptionOwnershipAsync(uid: string, products: Array<string>): Promise<void> {
+  const purchaseList = await playBilling.users().queryCurrentSubscriptions(uid)
+    .catch(err => {
+      console.error(err.message);
+      throw new functions.https.HttpsError('internal', 'Internal server error');
+    });
 
-//   const subscriptionStatusList = purchaseList.map(subscriptionPurchase => new SubscriptionStatus(subscriptionPurchase));
+  const subscriptionStatusList = purchaseList.map(subscriptionPurchase => new SubscriptionStatus(subscriptionPurchase));
 
-//   const doesUserHaveTheProduct = subscriptionStatusList.some(subscription => ((Object.keys(subscription).length > 0) && (subscription.isEntitlementActive)));
+  const doesUserHaveTheProduct = subscriptionStatusList.some(subscription => ((Object.keys(subscription).length > 0) && (subscription.isEntitlementActive)));
 
-//   if (!doesUserHaveTheProduct) {
-//     throw new functions.https.HttpsError('permission-denied', 'Valid subscription not found');
-//   }
-// }
+  if (!doesUserHaveTheProduct) {
+    throw new functions.https.HttpsError('permission-denied', 'Valid subscription not found');
+  }
+}
 
 /* Util function that verifies if current user owns at least one active purchases listed in OTP products
 */
-// async function verifyOtpOwnershipAsync(uid: string, products: Array<string>): Promise<void> {
-//   const purchaseList = await playBilling.users().queryCurrentOneTimeProductPurchases(uid)
-//     .catch(err => {
-//       console.error(err.message);
-//       throw new functions.https.HttpsError('internal', 'Internal server error');
-//     });
+async function verifyOtpOwnershipAsync(uid: string, products: Array<string>): Promise<void> {
+  const purchaseList = await playBilling.users().queryCurrentOneTimeProductPurchases(uid)
+    .catch(err => {
+      console.error(err.message);
+      throw new functions.https.HttpsError('internal', 'Internal server error');
+    });
 
-//   const isUserHavingTheProduct = purchaseList.some(purchase => ((products.indexOf(purchase.product) > -1) && (purchase.isEntitlementActive())));
-//   if (!isUserHavingTheProduct) {
-//     throw new functions.https.HttpsError('permission-denied', 'Valid one-time product purchase not found');
-//   }
-// }
+  const isUserHavingTheProduct = purchaseList.some(purchase => ((products.indexOf(purchase.product) > -1) && (purchase.isEntitlementActive())));
+  if (!isUserHavingTheProduct) {
+    throw new functions.https.HttpsError('permission-denied', 'Valid one-time product purchase not found');
+  }
+}

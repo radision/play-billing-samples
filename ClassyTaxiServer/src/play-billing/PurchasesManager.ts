@@ -275,7 +275,7 @@
          const now = Date.now();
          const subscriptionPurchase = SubscriptionPurchaseImpl.fromApiResponse(apiResponse, packageName, purchaseToken, product, now);
          subscriptionPurchase.replacedByAnotherPurchase = true; // Mark the purchase as already being replaced by other purchase.
-        //  subscriptionPurchase.userId = REPLACED_PURCHASE_USERID_PLACEHOLDER;
+         subscriptionPurchase.userId = REPLACED_PURCHASE_USERID_PLACEHOLDER;
          const firestoreObject = subscriptionPurchase.toFirestoreObject();
          await purchaseRecordDoc.ref.set(firestoreObject);
 
@@ -336,7 +336,7 @@
          const now = Date.now();
          const subscriptionPurchase = SubscriptionPurchaseImplV2.fromApiResponse(apiResponseV2, packageName, purchaseToken, product, now);
          subscriptionPurchase.replacedByAnotherPurchase = true; // Mark the purchase as already being replaced by other purchase.
-        //  subscriptionPurchase.userId = REPLACED_PURCHASE_USERID_PLACEHOLDER;
+         subscriptionPurchase.userId = REPLACED_PURCHASE_USERID_PLACEHOLDER;
          const firestoreObject = subscriptionPurchase.toFirestoreObject();
          await purchaseRecordDoc.ref.set(firestoreObject);
 
@@ -381,57 +381,57 @@
     * Register a purchase (both one-time product and recurring subscription) to a user.
     * It's intended to be exposed to Android app to verify purchases made in the app
     */
-  //  async registerToUserAccount(packageName: string, product: string, purchaseToken: string, productType: ProductType): Promise<void> {
-  //    // STEP 1. Fetch the purchase using Play Developer API and purchase records in Firestore.
-  //    let purchase: Purchase;
-  //    try {
-  //      purchase = await this.queryPurchase(packageName, product, purchaseToken, productType);
-  //    } catch (err) {
-  //      // console.error('Error querying purchase', err);
+   async registerToUserAccount(packageName: string, product: string, purchaseToken: string, productType: ProductType, userId: string): Promise<void> {
+     // STEP 1. Fetch the purchase using Play Developer API and purchase records in Firestore.
+     let purchase: Purchase;
+     try {
+       purchase = await this.queryPurchase(packageName, product, purchaseToken, productType);
+     } catch (err) {
+       // console.error('Error querying purchase', err);
 
-  //      // Error when attempt to query purchase. Return invalid token to caller.
-  //      const libraryError = new Error(err.message);
-  //      libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
-  //      throw libraryError;
-  //    }
+       // Error when attempt to query purchase. Return invalid token to caller.
+       const libraryError = new Error(err.message);
+       libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
+       throw libraryError;
+     }
 
-  //    // STEP 2. Check if the purchase is registerable.
-  //    if (!purchase.isRegisterable()) {
-  //      const libraryError = new Error('Purchase is not registerable');
-  //      libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
-  //      throw libraryError;
-  //    }
+     // STEP 2. Check if the purchase is registerable.
+     if (!purchase.isRegisterable()) {
+       const libraryError = new Error('Purchase is not registerable');
+       libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
+       throw libraryError;
+     }
 
-  //    // STEP 3. Check if the purchase has been registered to an user. If it is, then return conflict error to our caller.
-  //   //  if (purchase.userId === userId) {
-  //   //    // Purchase record already registered to the target user. We'll do nothing.
-  //   //    return;
-  //   //  } else if (purchase.userId) {
-  //   //    console.log('Purchase has been registered to another user');
-  //   //    // Purchase record already registered to different user. Return 'conflict' to caller
-  //   //    const libraryError = new Error('Purchase has been registered to another user');
-  //   //    libraryError.name = PurchaseUpdateError.CONFLICT;
-  //   //    throw libraryError;
-  //   //  }
+     // STEP 3. Check if the purchase has been registered to an user. If it is, then return conflict error to our caller.
+     if (purchase.userId === userId) {
+       // Purchase record already registered to the target user. We'll do nothing.
+       return;
+     } else if (purchase.userId) {
+       console.log('Purchase has been registered to another user');
+       // Purchase record already registered to different user. Return 'conflict' to caller
+       const libraryError = new Error('Purchase has been registered to another user');
+       libraryError.name = PurchaseUpdateError.CONFLICT;
+       throw libraryError;
+     }
 
-  //    // STEP 3: Register purchase to the user
-  //   //  await this.forceRegisterToUserAccount(purchaseToken, userId);
-  //  }
+     // STEP 3: Register purchase to the user
+     await this.forceRegisterToUserAccount(purchaseToken, userId);
+   }
 
-  //  async transferToUserAccount(packageName: string, product: string, purchaseToken: string, productType: ProductType, userId: string): Promise<void> {
-  //    try {
-  //      // STEP 1. Fetch the purchase using Play Developer API and purchase records in Firestore.
-  //      await this.queryPurchase(packageName, product, purchaseToken, productType);
+   async transferToUserAccount(packageName: string, product: string, purchaseToken: string, productType: ProductType, userId: string): Promise<void> {
+     try {
+       // STEP 1. Fetch the purchase using Play Developer API and purchase records in Firestore.
+       await this.queryPurchase(packageName, product, purchaseToken, productType);
 
-  //      // STEP 2: Attempt to transfer a purchase to the user
-  //      await this.forceRegisterToUserAccount(purchaseToken, userId);
-  //    } catch (err) {
-  //      // Error when attempt to query purchase. Return invalid token to caller.
-  //      const libraryError = new Error(err.message);
-  //      libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
-  //      throw libraryError;
-  //    }
-  //  }
+       // STEP 2: Attempt to transfer a purchase to the user
+       await this.forceRegisterToUserAccount(purchaseToken, userId);
+     } catch (err) {
+       // Error when attempt to query purchase. Return invalid token to caller.
+       const libraryError = new Error(err.message);
+       libraryError.name = PurchaseUpdateError.INVALID_TOKEN;
+       throw libraryError;
+     }
+   }
 
    async processDeveloperNotification(packageName: string, notification: DeveloperNotification): Promise<SubscriptionPurchaseV2 | null> {
      if (notification.testNotification) {

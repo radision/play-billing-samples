@@ -29,58 +29,58 @@ import { instanceId_register, instanceId_unregister } from './controller/functio
 
 // This is a trick to improve performance when there are many functions,
 // by only exporting the function that is needed by the particular instance.
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'content_basic') {
-  exports.content_basic = content_basic;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'content_basic') {
+//   exports.content_basic = content_basic;
+// }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'content_premium') {
-  exports.content_premium = content_premium;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'content_premium') {
+//   exports.content_premium = content_premium;
+// }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'content_otp') {
-  exports.content_otp = content_otp;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'content_otp') {
+//   exports.content_otp = content_otp;
+// }
 
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'subscription_register') {
   exports.subscription_register = subscription_register;
 }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'subscription_transfer') {
-  exports.subscription_transfer = subscription_transfer;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'subscription_transfer') {
+//   exports.subscription_transfer = subscription_transfer;
+// }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'subscription_status') {
-  exports.subscription_status = subscription_status;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'subscription_status') {
+//   exports.subscription_status = subscription_status;
+// }
 
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'realtime_notification_listener') {
   exports.realtime_notification_listener = realtime_notification_listener;
 }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'instanceId_register') {
-  exports.instanceId_register = instanceId_register;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'instanceId_register') {
+//   exports.instanceId_register = instanceId_register;
+// }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'instanceId_unregister') {
-  exports.instanceId_unregister = instanceId_unregister;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'instanceId_unregister') {
+//   exports.instanceId_unregister = instanceId_unregister;
+// }
 
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'acknowledge_purchase') {
   exports.acknowledge_purchase = acknowledge_purchase;
 }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'otp_register') {
-  exports.otp_register = otp_register;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'otp_register') {
+//   exports.otp_register = otp_register;
+// }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'otp_status') {
-  exports.otp_status = otp_status;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'otp_status') {
+//   exports.otp_status = otp_status;
+// }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'otp_acknowledge') {
-  exports.otp_acknowledge = otp_acknowledge;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'otp_acknowledge') {
+//   exports.otp_acknowledge = otp_acknowledge;
+// }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'otp_consume') {
-  exports.otp_consume = otp_consume;
-}
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'otp_consume') {
+//   exports.otp_consume = otp_consume;
+// }
